@@ -26,7 +26,6 @@ def predict_image(model, image, device):
     probability_percentage = int(max_probability * 100)
     return predicted_index, probability_percentage
 
-
 def load_model_for_inference(model_path, num_classes, device):
     model = models.resnet18(pretrained=False)
     model.fc = nn.Linear(model.fc.in_features, num_classes)
@@ -35,25 +34,28 @@ def load_model_for_inference(model_path, num_classes, device):
     model.eval()
     return model
 
-# Cargar el modelo
+# Load the model
 model_path = './modelos/classification_model4_4.pth'
 num_classes = 4
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 model = load_model_for_inference(model_path, num_classes, device)
 
-class_names = ['Cocker', 'Pekinese', 'Cocker', 'Poodle']
+class_names = ['Cocker', 'Pekinese', 'Poodle']
 
 @app.route('/classify', methods=['POST'])
 def classify_image():
-    if 'image' not in request.files:
-        return jsonify({"error": "No image uploaded"}), 400
+    if 'file' not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
 
-    image = Image.open(BytesIO(request.files['image'].read()))
+    try:
+        image = Image.open(BytesIO(request.files['file'].read()))
+    except Exception as e:
+        return jsonify({"error": f"Error processing image: {e}"}), 400
 
     predicted_index, probability_percentage = predict_image(model, image, device)
 
     if probability_percentage < 80.99:
-        return jsonify({"breed": "Indefinida o imagen no válida", "probability": None})
+        return jsonify({"breed": "Undefined or invalid image", "probability": None})
 
     breed_description = class_names[predicted_index]
     
