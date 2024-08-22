@@ -40,7 +40,7 @@ num_classes = 4
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 model = load_model_for_inference(model_path, num_classes, device)
 
-class_names = ['Cocker', 'Pekinese', 'Poodle']
+class_names = ['Cocker', 'Pekinese', 'Poodle', 'Schnauzer']
 
 @app.route('/classify', methods=['POST'])
 def classify_image():
